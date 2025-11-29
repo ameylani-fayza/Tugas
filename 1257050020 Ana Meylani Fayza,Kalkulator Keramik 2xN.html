@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)file:///C:/Users/X441/Documents/cpp/CT.html -->
+<html lang="id"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Keramik 2xN &amp; Visualisasi Sempurna N=10</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 30px;
+        }
+
+        /* --- Gaya Kalkulator Utama --- */
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            min-height: 50px;
+            padding-top: 10px;
+        }
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e55;
+        }
+        .limit-warning {
+            color: #dc3545;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* --- Gaya Visualisasi Pola --- */
+        #patterns-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #patterns-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 10px 0;
+        }
+        .keramik-pattern {
+            border: 2px solid #333; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+            display: grid;
+            background-color: transparent; 
+            margin: 5px;
+            border-collapse: collapse; 
+            overflow: hidden; 
+        }
+        .tile {
+            /* Ukuran unit dasar 30x30px */
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em; 
+            color: white; 
+            font-weight: bold;
+            box-sizing: border-box;
+            border: 1px solid rgba(0, 0, 0, 0.2); 
+            text-shadow: none; 
+        }
+        
+        /* WARNA UTAMA */
+        .tile.vertical {
+            background-color: #28a745; /* Hijau Solid */
+        }
+        .tile.horizontal {
+            background-color: #fd7e14; /* Oranye Solid */
+        }
+        
+        /* --- LOGIKA PERBAIKAN SOLIDITAS UBIN --- */
+
+        /* 1. Ubin Vertikal (V): Tetap sempurna (satu elemen merentang 2 baris) */
+        .tile.vertical.full {
+            grid-row: span 2; 
+            height: 60px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 2. Ubin Horizontal (H) - BARIS 1 (ATAS) */
+        .tile.horizontal.top-left {
+            border-right: none; 
+            color: transparent; /* <-- KIRI: Sembunyikan 'H' */
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tile.horizontal.top-right {
+            border-left: none; 
+            /* Warna teks default (putih) digunakan di sini */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 3. Ubin Horizontal (H) - BARIS 2 (BAWAH) */
+        .tile.horizontal.bottom-left {
+            border-right: none; 
+            color: transparent; /* <-- KIRI: Sembunyikan 'H' */
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tile.horizontal.bottom-right {
+            border-left: none; 
+            /* Warna teks default (putih) digunakan di sini */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="title">Kalkulator Penataan Keramik 2xN</h2>
+        
+        <div class="input-group">
+            <label for="lebarN">Masukkan Nilai N:</label>
+            <input type="number" id="lebarN" value="6" min="1" max="10">
+        </div>
+
+        <button onclick="hitungDanVisualisasi()">Lihat Kemungkinan</button>
+
+        <div id="result-display">Ditemukan **13 cara** untuk menyusun keramik pada ukuran 2x6.</div>
+        <p class="limit-warning">*Visualisasi pola dibatasi hingga **N=10** (89 pola) untuk performa optimal.</p>
+    </div>
+
+    <div id="patterns-container">
+        <h3 class="title">Visualisasi Semua Pola (Total: <span id="pattern-count">13</span>)</h3>
+        <div id="patterns-list"><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile vertical full" style="grid-area: 1 / 1 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 2 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 3 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 4 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 5 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 6 / span 2;">V</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile vertical full" style="grid-area: 1 / 1 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 2 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 3 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 4 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 5;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 6;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 5;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 6;">H</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile vertical full" style="grid-area: 1 / 1 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 2 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 3 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 4;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 5;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 4;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 5;">H</div><div class="tile vertical full" style="grid-area: 1 / 6 / span 2;">V</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile vertical full" style="grid-area: 1 / 1 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 2 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 3;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 4;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 3;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 4;">H</div><div class="tile vertical full" style="grid-area: 1 / 5 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 6 / span 2;">V</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile vertical full" style="grid-area: 1 / 1 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 2 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 3;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 4;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 3;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 4;">H</div><div class="tile horizontal top-left" style="grid-area: 1 / 5;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 6;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 5;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 6;">H</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile vertical full" style="grid-area: 1 / 1 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 2;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 3;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 2;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 3;">H</div><div class="tile vertical full" style="grid-area: 1 / 4 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 5 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 6 / span 2;">V</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile vertical full" style="grid-area: 1 / 1 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 2;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 3;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 2;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 3;">H</div><div class="tile vertical full" style="grid-area: 1 / 4 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 5;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 6;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 5;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 6;">H</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile vertical full" style="grid-area: 1 / 1 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 2;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 3;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 2;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 3;">H</div><div class="tile horizontal top-left" style="grid-area: 1 / 4;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 5;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 4;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 5;">H</div><div class="tile vertical full" style="grid-area: 1 / 6 / span 2;">V</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile horizontal top-left" style="grid-area: 1 / 1;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 2;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 1;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 2;">H</div><div class="tile vertical full" style="grid-area: 1 / 3 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 4 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 5 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 6 / span 2;">V</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile horizontal top-left" style="grid-area: 1 / 1;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 2;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 1;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 2;">H</div><div class="tile vertical full" style="grid-area: 1 / 3 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 4 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 5;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 6;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 5;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 6;">H</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile horizontal top-left" style="grid-area: 1 / 1;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 2;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 1;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 2;">H</div><div class="tile vertical full" style="grid-area: 1 / 3 / span 2;">V</div><div class="tile horizontal top-left" style="grid-area: 1 / 4;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 5;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 4;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 5;">H</div><div class="tile vertical full" style="grid-area: 1 / 6 / span 2;">V</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile horizontal top-left" style="grid-area: 1 / 1;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 2;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 1;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 2;">H</div><div class="tile horizontal top-left" style="grid-area: 1 / 3;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 4;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 3;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 4;">H</div><div class="tile vertical full" style="grid-area: 1 / 5 / span 2;">V</div><div class="tile vertical full" style="grid-area: 1 / 6 / span 2;">V</div></div><div class="keramik-pattern" style="grid-template-columns: repeat(6, 30px); grid-template-rows: repeat(2, 30px);"><div class="tile horizontal top-left" style="grid-area: 1 / 1;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 2;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 1;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 2;">H</div><div class="tile horizontal top-left" style="grid-area: 1 / 3;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 4;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 3;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 4;">H</div><div class="tile horizontal top-left" style="grid-area: 1 / 5;"></div><div class="tile horizontal top-right" style="grid-area: 1 / 6;">H</div><div class="tile horizontal bottom-left" style="grid-area: 2 / 5;"></div><div class="tile horizontal bottom-right" style="grid-area: 2 / 6;">H</div></div></div>
+    </div>
+
+    <script>
+        const MAX_N_VISUAL = 10; 
+
+        function hitungFibonacci(N) {
+            if (N <= 0) return 0n;
+            if (N === 1) return 1n;
+            if (N === 2) return 2n; 
+
+            let c_prev2 = 1n;
+            let c_prev1 = 2n;
+            let c_current = 0n;
+
+            for (let i = 3; i <= N; i++) {
+                c_current = c_prev1 + c_prev2;
+                c_prev2 = c_prev1;
+                c_prev1 = c_current;
+            }
+            return c_current;
+        }
+
+        function findPatterns(N) {
+            let allPatterns = [];
+            
+            function backtrack(currentPattern, currentLength) {
+                if (currentLength === N) {
+                    allPatterns.push(currentPattern);
+                    return;
+                }
+                if (currentLength > N) {
+                    return;
+                }
+
+                // 1. Vertikal (V): mengisi 1 kolom
+                backtrack(currentPattern.concat(['V']), currentLength + 1);
+
+                // 2. Horizontal (H): mengisi 2 kolom
+                if (currentLength + 2 <= N) {
+                    backtrack(currentPattern.concat(['H']), currentLength + 2);
+                }
+            }
+            
+            backtrack([], 0);
+            return allPatterns;
+        }
+        
+        function renderPattern(patternRepresentation, N) {
+            const patternDiv = document.createElement('div');
+            patternDiv.className = 'keramik-pattern';
+            patternDiv.style.gridTemplateColumns = `repeat(${N}, 30px)`; 
+            patternDiv.style.gridTemplateRows = `repeat(2, 30px)`; 
+
+            let col = 1; 
+            
+            for (let i = 0; i < patternRepresentation.length; i++) {
+                const tileType = patternRepresentation[i];
+
+                if (tileType === 'V') {
+                    // Ubin Vertikal (2x1) - SATU elemen, merentang baris
+                    const tile = document.createElement('div');
+                    tile.className = 'tile vertical full'; 
+                    tile.textContent = 'V'; 
+                    tile.style.gridRow = `1 / span 2`; 
+                    tile.style.gridColumn = `${col}`;
+                    patternDiv.appendChild(tile);
+
+                    col++;
+
+                } else if (tileType === 'H') {
+                    // Ubin Horizontal (1x2) - BUAT DUA PASANG ELEMEN (Baris 1 dan Baris 2)
+                    
+                    // --- Ubin Horizontal BARIS 1 ---
+                    // Ubin Horizontal Kiri (Baris 1, Kolom ${col})
+                    const tile1_left = document.createElement('div');
+                    tile1_left.className = 'tile horizontal top-left'; 
+                    tile1_left.textContent = ''; // <--- KOSONG
+                    tile1_left.style.gridRow = `1`; 
+                    tile1_left.style.gridColumn = `${col}`;
+                    patternDiv.appendChild(tile1_left);
+
+                    // Ubin Horizontal Kanan (Baris 1, Kolom ${col} + 1)
+                    const tile1_right = document.createElement('div');
+                    tile1_right.className = 'tile horizontal top-right'; 
+                    tile1_right.textContent = 'H'; // <--- TEKS 'H' DI SINI (Tengah)
+                    tile1_right.style.gridRow = `1`; 
+                    tile1_right.style.gridColumn = `${col + 1}`; 
+                    patternDiv.appendChild(tile1_right);
+
+                    // --- Ubin Horizontal BARIS 2 ---
+                    // Ubin Horizontal Kiri (Baris 2, Kolom ${col})
+                    const tile2_left = document.createElement('div');
+                    tile2_left.className = 'tile horizontal bottom-left'; 
+                    tile2_left.textContent = ''; // <--- KOSONG
+                    tile2_left.style.gridRow = `2`; 
+                    tile2_left.style.gridColumn = `${col}`;
+                    patternDiv.appendChild(tile2_left);
+
+                    // Ubin Horizontal Kanan (Baris 2, Kolom ${col} + 1)
+                    const tile2_right = document.createElement('div');
+                    tile2_right.className = 'tile horizontal bottom-right'; 
+                    tile2_right.textContent = 'H'; // <--- TEKS 'H' DI SINI (Tengah)
+                    tile2_right.style.gridRow = `2`; 
+                    tile2_right.style.gridColumn = `${col + 1}`; 
+                    patternDiv.appendChild(tile2_right);
+
+                    col += 2;
+                }
+            }
+            return patternDiv;
+        }
+
+        function hitungDanVisualisasi() {
+            const inputElement = document.getElementById('lebarN');
+            const N = parseInt(inputElement.value);
+            const resultDisplay = document.getElementById('result-display');
+            const patternsList = document.getElementById('patterns-list');
+            const patternCountDisplay = document.getElementById('pattern-count');
+            
+            patternsList.innerHTML = ''; 
+
+            if (isNaN(N) || N < 1) {
+                resultDisplay.innerHTML = "Masukkan angka positif untuk Lebar Ruangan (N).";
+                patternCountDisplay.textContent = 0;
+                return;
+            }
+            
+            const jumlahCaraBigInt = hitungFibonacci(N);
+            const jumlahCara = jumlahCaraBigInt.toString(); 
+
+            resultDisplay.innerHTML = `Ditemukan **${jumlahCara} cara** untuk menyusun keramik pada ukuran 2x${N}.`;
+
+            if (N <= MAX_N_VISUAL) {
+                const allPatterns = findPatterns(N);
+                
+                patternCountDisplay.textContent = allPatterns.length;
+                
+                allPatterns.forEach((pattern) => {
+                    const patternElement = renderPattern(pattern, N);
+                    patternsList.appendChild(patternElement);
+                });
+            } else {
+                patternsList.innerHTML = `<p class="limit-warning">Visualisasi Pola dihentikan pada N=${MAX_N_VISUAL} untuk menjaga performa browser.<br>Total pola yang ditemukan adalah **${jumlahCara}**.</p>`;
+                patternCountDisplay.textContent = jumlahCara;
+            }
+
+            console.log(`Nilai N: ${N}, Jumlah Cara: ${jumlahCara}`);
+        }
+
+        document.addEventListener('DOMContentLoaded', hitungDanVisualisasi);
+    </script>
+
+</body></html>
